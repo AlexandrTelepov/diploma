@@ -1,4 +1,7 @@
 \documentclass[12pt]{article}
+\usepackage[pdftex]{graphicx}
+\graphicspath{{pictures/}}
+%\DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \usepackage{amsmath,amssymb,amsthm,latexsym,amsfonts}
 \usepackage[utf8]{inputenc} % Включаем поддержку UTF8
 \usepackage[T2A]{fontenc}
@@ -8,7 +11,6 @@
 \usepackage{graphicx}
 \usepackage[unicode, pdftex]{hyperref}
 \graphicspath{{pictures/}}
-\usepackage{hyperref}
 %\usepackage{indentfirst}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg,.eps}
 \DeclareMathOperator*{\argmax}{argmax} % thin space, limits underneath in displays
@@ -16,6 +18,12 @@
 \title{\LaTeX}
 \date{}
 \author{}
+
+\usepackage{hyperref}
+\usepackage{xcolor}
+\definecolor{linkcolor}{HTML}{799B03} % цвет ссылок
+\definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
+\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
 
 
 \begin{document}
@@ -34,8 +42,8 @@
 \vfill
 \Large
 \begin{centering}
-{\bf Исследование применимости\\ методов машинного обучения \\
-в обратной задаче гравиметрии\\}
+{\bf Реализация метода продолжения потенциала \\
+для решения обратной задачи гравиметрии\\}
 \end{centering}
 \normalsize
 \vfill
@@ -103,10 +111,6 @@ $\psi$ - угол между вертикалью и вектором $\vec{r} =
 Заметим, что если мы умеем определять все параметры 1 любого источника, то мы можем решить задачу, последовательно вычитая поле найденного источника и снова находя параметры какого-либо из оставшихся источников.
 
 \section
-{Методы решения обратной задачи}
- 
-
-\subsection
 {Метод продолжения гравитационного поля}
 
 Алгоритмы продолжения гравитационного поля вглубь земли используются для уменьшения влияния совокупности источников на создаваемое поле в окрестности отдельно взятого тела.\\
@@ -153,12 +157,12 @@ $r{\longrightarrow}{\infty}$\\
 Заметим, что \[{\Delta}U(M)=-4{\pi}{\rho}(M),\] 
  \[\frac{{\partial}U}{{\partial}z}=g_z(x,y,z)\] \\
 Записав формулу для $U(x,y,z)$ в области, где отстутвуют источники($\rho(M_0)=0$) и продифференцировав по $z$ получим:
-\[g_z(x,y,z)=\frac{1}{2\pi}\iint\limits_{{-\infty}{-\infty}}^{{+\infty}{+\infty}}\frac{g_z(x_0,y_0,h)(h-z)}{((x-x_0)^2+(y-y_0)^2+(h-z)^2)^{\frac{3}{2}}}\,dx_0dy_0\]
+\[g_z(x,y,z)=\frac{1}{2\pi}\iint\limits_{{-\infty}{-\infty}}^{{+\infty}{+\infty}}\frac{g_z(x_0,y_0,h)(h-z)}{((x-x_0)^2+(y-y_0)^2+(h-z)^2)^{\frac{3}{2}}} \,dx_0dy_0\]
 Это - интегральное уравнение первого рода для напряженности на глубине $z=h$ с $\delta$-образным ядром. Решение этого уравнения является некорректной задачей.\\
 В \cite{dmitriev2012iterative1786867} был предложен итерационный метод решения данного интегрального уравнения.\\
-Перепишем уравнение в  виде \[g(x,y,h)+\frac{h}{\pi}\iint\limits_{{-\infty}{-\infty}}^{{+\infty}{+\infty}}\frac{g(x_0,y_0,h)-g(x,y,h)}{(x-x_0)^2+(y-y_0)^2+h^2} \,dx_0dy_0=g(x,y,0)\]
+Перепишем уравнение в  виде \[g(x,y,h)+\frac{h}{\pi}\iint\limits_{{-\infty}{-\infty}}^{{+\infty}{+\infty}}\frac{g(x_0,y_0,h)-g(x,y,h)}{((x-x_0)^2+(y-y_0)^2+(h-z)^2)^{\frac{3}{2}}} \,dx_0dy_0=g(x,y,0)\]
 Итерационный процесс записывается следущим образом:
-\[g_n(x,y,h)=g_{n-1}+g(x,y,0)-\frac{h}{\pi}\iint\limits_{{-\infty}{-\infty}}^{{+\infty}{+\infty}}\frac{g_{n-1}(x_0,y_0,h)}{(x-x_0)^2+(y-y_0)^2+h^2} \,dx_0dy_0\]
+\[g_n(x,y,h)=g_{n-1}+g(x,y,0)-\frac{h}{\pi}\iint\limits_{{-\infty}{-\infty}}^{{+\infty}{+\infty}}\frac{g_{n-1}(x_0,y_0,h)}{((x-x_0)^2+(y-y_0)^2+(h-z)^2)^{\frac{3}{2}}} \,dx_0dy_0\]
 
 \section
 {Численные эксперименты}
@@ -167,27 +171,47 @@ $r{\longrightarrow}{\infty}$\\
 Результаты курсовой работы будут представлены в виде графиков точности определения параметров источников гравитационного поля от уровня шума в начальных данных для предложенных методов решения обратной задачи.\\
 Также критериями качества метода будет являться скорость работы, а также возможность и эффективность параллельной реализации.
 
-\subsection
-{Метод продолжения гравитационного поля}
 
 В главе 2.1 был описан итерационный метод решения интегрального уравнения с $\delta$-образным ядром.\\
- Считая $U_z(x,y)$ равной 0 всюду вне $$S = \left[{\frac{-Nh_x}{2},\frac{Nh_x}{2}} \right] \times \left[{\frac{-Mh_y}{2},\frac{Mh_y}{2}} \right] $$ 
+ Считая $U_z(x,y)$ равной 0 всюду вне $$S = \left[{-N, N} \right] \times \left[{-M, M} \right] $$ 
 и постоянной в областях $$x \in \left[{\left({n-\frac{1}{2}}\right)h_x,\left({n+\frac{1}{2}}\right)h_x} \right] , y \in \left[\left({m-\frac{1}{2}}\right)h_y,\left({m+\frac{1}{2}}\right)h_y \right] $$ 
 
 Формула из главы 2.1 преобразуется в:\\
 \[U_{nm}^s=U_{nm}^{s-1}-\sum_{i=-N}^N{\sum_{j=-M}^M a_{ij}^{nm}U_{ij}^{s-1}}\]
 
-$$n \in \left[{\frac{-N}{2},\frac{N}{2}} \right] , m \in \left[{\frac{-M}{2},\frac{M}{2}} \right] $$\\
+$$n \in \left[{-N,N} \right] , m \in \left[{-M, M} \right] $$\\
 $$x_n=nh_x, y_m=mh_y$$
 %\small
 \[a_{ij}^{nm} = \varphi(x_i-x_n+\frac{h_x}{2},y_j-y_m+\frac{h_y}{2}) + \varphi(x_i-x_n-\frac{h_x}{2},y_j-y_m-\frac{h_y}{2}) -\] \[- \varphi(x_i-x_n-\frac{h_x}{2},y_j-y_m+\frac{h_y}{2}) - \varphi(x_i-x_n+\frac{h_x}{2},y_j-y_m-\frac{h_y}{2})\]
 %\normalsize
 
-\[\varphi(x,y)=\frac{1}{2\pi}arctg\left({\frac{xy}{\sqrt{x^2+y^2+z^2}}}\right)\]
+\[\varphi(x,y)=\frac{1}{2\pi}arctg\left({\frac{xy}{z\sqrt{x^2+y^2+z^2}}}\right)\]
 \newline
 При последовательном увелечении глубины алгоритм будет уточнять глубину залегания ближайщего источника, т.к влияние остальных тел будет уменьшаться.
 После пересечения глубины залегания источника алгоритм будет искать такой источник под «перескоченным», которой будет давать мало отличающеся на поверхности поле. Мощность и глубина залегания такого источника источника увеличатся - это мы и возьмем за критерий останова.
 
+Метод продолжения потенциала был реализован на языке python с использованием библиотек pytorch, numpy, matplotlib и plotly. Все исходные коды и резльтаты работы можно найти в репозитории \href{https://github.com/AlexandrTelepov/diploma}{https://github.com/AlexandrTelepov/diploma}.
+Численные эксперементы проводились над полями сгенерированными по формуле (1), все операции проводились над числами с двойной точностью.
+Разное колличество итераций.
+
+%\includegraphics{picture1}
+\begin{figure}[h]
+\begin{minipage}[h]{0.49\linewidth}
+\center{\includegraphics[width=0.5\linewidth]{picture1}}
+\caption{Описание}
+\label{fig:image}
+\end{minipage}
+\hfill
+\begin{minipage}[h]{0.49\linewidth}
+\center{\includegraphics[width=0.5\linewidth]{picture1}}
+\caption{Описание}
+\label{fig:image}
+\end{minipage}
+\end{figure}
+
+\section
+{Заключение}
+В данной работе реализован метод продолжения потенциала для решения обратной задачи гравиметрии. Были проведены численные эксперименты с различными конфигурациями источников гравитационного поля. Результаты показывают эффективность предложенного метода.
 \clearpage
 
 \bibliographystyle{utf8gost705u}
